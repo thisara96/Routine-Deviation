@@ -20,16 +20,39 @@ def last_val(last_date, ):
     result = firebase.get('/Sensor/{}'.format(last_date), '')
     return result[-1]
 
+def get_data():
+    result = firebase.get('/SensorData', '')
+    list_dict = []
+    #iterating through days
+    print(result)
+    for i in result:
+        last_date = i
+    for i in result:
+        for j in result[i]:
+            if isinstance(result[i], list):
+                if j != None:
+                    list_dict.append(j)
+            elif isinstance(result[i], dict):
+                list_dict.append(result[i][j])
+    
+    #convert the data into a dataframe
 
-last_date_ = last_date()
+    data = pd.DataFrame(list_dict)
+    #changing the datatype of the column D to days
+    data['D'] = pd.to_datetime(data['D'])
 
-result = firebase.get('/Sensor/09_21', '')
+    df = data.copy()
+    #get minute by minute data by removing the seconds value
+    df['D'] = data['D'].dt.strftime('%d-%m-%Y %H:%M')
+    df['D'] = pd.to_datetime(df['D'])
 
-keys = result.keys()
-keys = list(map(int, keys))
+    return df
 
-result = result[str(keys[-1])]
+#last_date_ = last_date()
 
-print(result)
+#result = firebase.get('/SensorData', '')
 
-print(last_val(last_date_))
+#print(result)
+
+print(get_data())
+#print(len(get_data()))
